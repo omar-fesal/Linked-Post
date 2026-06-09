@@ -1,0 +1,10 @@
+import { useContext } from 'react'
+import { Navigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+
+export default function AuthRoute({ children }) {
+    const { isLogged } = useContext(AuthContext)
+
+    return !isLogged ? children : <Navigate to={'/'} replace />
+
+}
