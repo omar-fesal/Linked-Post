@@ -35,11 +35,8 @@ export default function FeedContent() {
     }
 
     // Callback passed to each PostCard so deleted posts are removed instantly
-    async function handlePostDeleted() {
-        const fresh = await queryClient.fetchQuery({ queryKey: ['posts'], queryFn: getPosts })
-        if (fresh?.data?.data?.posts) {
-            setLocalPosts(fresh.data.data.posts)
-        }
+    function handlePostDeleted(deletedId) {
+        setLocalPosts((prev) => prev.filter((p) => (p._id || p.id) !== deletedId))
     }
 
     return (

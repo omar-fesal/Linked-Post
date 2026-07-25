@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import ProfilePostHead from '../Components/Posts/ProfilePostHead'
 import PostForm from '../Components/PostForm'
 import { AuthContext } from '../context/AuthContext'
@@ -16,6 +16,24 @@ export default function ProfilePage() {
         enabled: !!userData?._id
     });
 
+    // Local list so posts can be removed instantly on delete
+    const [localPosts, setLocalPosts] = useState([])
+
+    useEffect(() => {
+        if (data?.data?.posts) {
+            setLocalPosts(data.data.posts)
+        }
+    }, [data])
+
+    function handlePostCreated(newPost) {
+        const enriched = { ...newPost, user: newPost.user ?? userData }
+        setLocalPosts((prev) => [enriched, ...prev])
+    }
+
+    function handlePostDeleted(deletedId) {
+        setLocalPosts((prev) => prev.filter((p) => (p._id || p.id) !== deletedId))
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-2xl mx-auto px-4 py-6">
@@ -23,15 +41,22 @@ export default function ProfilePage() {
             </div>
 
             <div className="max-w-2xl mx-auto px-4">
-                <PostForm />
+                <PostForm onPostCreated={handlePostCreated} />
             </div>
 
             <div className="max-w-2xl mx-auto px-4 py-3">
-                {data?.data?.posts?.length > 0 ? (
+                {isLoading ? (
+                    <LoadingScreen />
+                ) : localPosts.length > 0 ? (
                     <div>
-                        {isLoading ? <LoadingScreen /> :
-                            data.data.posts.map((post) => <PostCard key={post.id} post={post} commentLimit={1} />)
-                        }
+                        {localPosts.map((post) => (
+                            <PostCard
+                                key={post._id || post.id}
+                                post={post}
+                                commentLimit={1}
+                                callback={handlePostDeleted}
+                            />
+                        ))}
                     </div>
                 ) : (
                     <div className="bg-white rounded-md shadow p-8 text-center">

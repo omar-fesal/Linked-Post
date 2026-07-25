@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Loader2, UserCheck, UserPlus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 
 export default function PostHeader({ post, photo, name, date, userId, postId, callback, setIsDeletPost, onPostUpdated, isFollow, usersId, onFollowToggle, isFollowPending }) {
@@ -21,9 +22,15 @@ export default function PostHeader({ post, photo, name, date, userId, postId, ca
     const isOwner = usersId === userData?._id;
     async function deletPost() {
         setIsDeletPost(true)
-        const resp = await deletPostApi(postId)
-        if (resp.message == 'success') {
-            await callback()
+        try {
+            const resp = await deletPostApi(postId)
+            if (resp) {
+                callback?.(postId)
+                toast.success('Post deleted successfully 🗑️')
+            }
+        } catch (e) {
+            console.error('Delete failed', e)
+            toast.error('Failed to delete post. Please try again.')
         }
         setIsDeletPost(false)
     }

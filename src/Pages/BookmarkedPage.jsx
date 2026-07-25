@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getMyBookmarkedPosts } from '../Services/PostService'
 import PostCard from '../Components/Posts/PostCard'
@@ -16,6 +16,15 @@ export default function BookmarkedPage() {
 
     const bookmarks = data?.data?.bookmarks || []
 
+    const [localBookmarks, setLocalBookmarks] = useState([])
+    useEffect(() => {
+        if (data?.data?.bookmarks) setLocalBookmarks(data.data.bookmarks)
+    }, [data])
+
+    function handlePostDeleted(deletedId) {
+        setLocalBookmarks((prev) => prev.filter((p) => (p._id || p.id) !== deletedId))
+    }
+
     return (
         <div className="py-4">
 
@@ -27,7 +36,7 @@ export default function BookmarkedPage() {
                 <div>
                     <h1 className="text-xl font-bold text-gray-800">Saved Posts</h1>
                     <p className="text-sm text-gray-400">
-                        {isLoading ? '...' : `${bookmarks.length} saved post${bookmarks.length !== 1 ? 's' : ''}`}
+                        {isLoading ? '...' : `${localBookmarks.length} saved post${localBookmarks.length !== 1 ? 's' : ''}`}
                     </p>
                 </div>
             </div>
@@ -35,7 +44,7 @@ export default function BookmarkedPage() {
             {/* Content */}
             {isLoading ? (
                 <LoadingScreen />
-            ) : bookmarks.length === 0 ? (
+            ) : localBookmarks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                     <div className="bg-gray-100 p-5 rounded-full mb-4">
                         <Bookmark size={36} className="text-gray-300" />
@@ -46,7 +55,7 @@ export default function BookmarkedPage() {
                     </p>
                 </div>
             ) : (
-                bookmarks.map((post) => (
+                localBookmarks.map((post) => (
                     <PostCard
                         key={post._id}
                         post={{
@@ -55,6 +64,7 @@ export default function BookmarkedPage() {
                             bookmarks: post.bookmarked ? [userData?.id] : [],
                         }}
                         commentLimit={1}
+                        callback={handlePostDeleted}
                     />
                 ))
             )}

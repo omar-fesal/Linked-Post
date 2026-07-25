@@ -35,14 +35,8 @@ export default function MyPosts() {
         setLocalPosts((prev) => [enriched, ...prev])
     }
 
-    async function handlePostDeleted() {
-        const fresh = await queryClient.fetchQuery({
-            queryKey: ["userPosts"],
-            queryFn: () => getUserPostApi(userData?._id)
-        })
-        if (fresh?.data?.posts) {
-            setLocalPosts(fresh.data.posts)
-        }
+    function handlePostDeleted(deletedId) {
+        setLocalPosts((prev) => prev.filter((p) => (p._id || p.id) !== deletedId))
     }
 
     return <>

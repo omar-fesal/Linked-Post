@@ -17,8 +17,11 @@ export default function CommunityPage() {
         if (data) {
             setPosts(data.data.posts);
         }
-
     }, [data]);
+
+    function handlePostDeleted(deletedId) {
+        setPosts((prev) => prev.filter((p) => (p._id || p.id) !== deletedId))
+    }
 
     return <>
         {isLoading ? (
@@ -31,9 +34,10 @@ export default function CommunityPage() {
         ) : (
             posts.map((post) => (
                 <PostCard
-                    key={post.id}
+                    key={post.id || post._id}
                     post={post}
                     commentLimit={1}
+                    callback={handlePostDeleted}
                 />
             ))
         )}
