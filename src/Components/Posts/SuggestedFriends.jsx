@@ -71,10 +71,20 @@ function FriendRow({ friend }) {
 }
 
 export default function SuggestedFriends({ followersLimit }) {
+    const [searchQuery, setSearchQuery] = useState('');
 
     const { data, isLoading } = useQuery({
         queryKey: ['follow suggest'],
         queryFn: () => GetFollowSuggest(followersLimit),
+    });
+
+    const allSuggestions = data?.data.suggestions ?? [];
+    const filteredSuggestions = allSuggestions.filter((friend) => {
+        const q = searchQuery.toLowerCase();
+        return (
+            friend.name?.toLowerCase().includes(q) ||
+            friend.username?.toLowerCase().includes(q)
+        );
     });
 
     return (
@@ -85,7 +95,7 @@ export default function SuggestedFriends({ followersLimit }) {
                 </h2>
 
                 <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-semibold">
-                    {data?.data.suggestions.length}
+                    {filteredSuggestions.length}
                 </div>
             </div>
 
@@ -94,12 +104,18 @@ export default function SuggestedFriends({ followersLimit }) {
                 startContent={<Search size={18} />}
                 radius="lg"
                 className="mb-5"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
             />
 
             <div className="space-y-4">
-                {data?.data.suggestions.map((friend) => (
-                    <FriendRow key={friend._id || friend.id} friend={friend} />
-                ))}
+                {filteredSuggestions.length > 0 ? (
+                    filteredSuggestions.map((friend) => (
+                        <FriendRow key={friend._id || friend.id} friend={friend} />
+                    ))
+                ) : (
+                    <p className="text-sm text-default-400 text-center py-2">No results found</p>
+                )}
             </div>
 
             <div
