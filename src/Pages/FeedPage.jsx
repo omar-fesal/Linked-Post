@@ -1,53 +1,24 @@
-import { Button } from '@heroui/react'
-import React, { useEffect, useState } from 'react'
-import { getPosts } from '../Services/PostService'
-import LoadingScreen from '../Components/LoadingScreen';
-
-import PostCard from '../Components/Posts/PostCard';
-import PostForm from '../Components/PostForm';
-import { useQuery } from '@tanstack/react-query';
+import React from 'react'
+import { Outlet } from 'react-router-dom';
+import Sidebar from '../Components/Posts/Sidebar';
+import SuggestedFriends from '../Components/Posts/SuggestedFriends';
 
 export default function FeedPage() {
-    // const [posts, setPosts] = useState([]);
-    // const [loading, setLoading] = useState(true);
+    return (
+        <div className="max-w-7xl mx-auto flex gap-6">
 
-    // async function getAllPosts() {
-    //     const resp = await getPosts();
-    //     if (resp.message == 'success') {
-    //         setPosts(resp.posts)
-    //     }
-    //     setLoading(false)
-    // }
-    // useEffect(
-    //     () => { getAllPosts() }
-    //     , [])
+            <aside className="w-64 sticky top-24 self-start mt-6">
+                <Sidebar />
+            </aside>
 
-    const { data, isLoading, isError, error, isFetching } = useQuery({
-        queryKey: ['posts'],
-        queryFn: getPosts
-    })
+            <main className="flex-1 max-w-xl">
+                <Outlet />
+            </main>
 
-    return <>
+            <aside className="w-80 sticky top-24 self-start">
+                <SuggestedFriends followersLimit={4} />
+            </aside>
 
-
-
-        <div className="w-xl mx-auto">
-
-            {/* <PostForm getAllPosts={getAllPosts} /> */}
-
-            {isLoading ? <LoadingScreen /> :
-                data.data.posts.map((post) => <PostCard key={post.id} post={post} commentLimit={1} />)
-
-            }
-
-
-
-
-        </div >
-
-
-
-
-
-    </>
+        </div>
+    )
 }

@@ -11,11 +11,13 @@ export default function AuthContextProvider({ children }) {
         return token !== null && token !== undefined && token !== '';
     });
 
+
+
     const [userData, setUserData] = useState(null)
     async function getUserData() {
         const response = await isLoggedInData();
         if (response.message === 'success') {
-            setUserData(response.user)
+            setUserData(response.data.user)
         } else {
             // If token is invalid, clear it and log out
             localStorage.removeItem('token');

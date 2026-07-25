@@ -1,10 +1,19 @@
-import { Button, Textarea } from '@heroui/react'
-import React from 'react'
+import { Button, TextArea } from '@heroui/react'
+import React, { useContext } from 'react'
 import { useState } from 'react'
 import { createPostApi } from '../Services/PostService';
 import placeholder from '../assets/placeholder.png'
+import { AuthContext } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
-export default function PostForm({ getAllPosts }) {
+/**
+ * PostForm
+ * Props:
+ *   onPostCreated(newPost) – called with the newly created post object
+ *                            so the parent can prepend it to the list instantly.
+ */
+export default function PostForm({ onPostCreated }) {
+    const { userData } = useContext(AuthContext);
     const [body, setBody] = useState('');
     const [image, setImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
@@ -26,20 +35,36 @@ export default function PostForm({ getAllPosts }) {
         image && formData.append('image', image)
 
         const resp = await createPostApi(formData)
-        if (resp.message == 'success') {
-            await getAllPosts()
+
+        if (resp?.success === true) {
+            // Clear the form immediately
             setBody('')
-            setImageUrl('')
+            setImage(null)
+            setImageUrl(null)
+            // Enrich the post with the current user object so PostCard
+            // can render the profile photo and name without a refetch
+            const enrichedPost = { ...resp.data.post, user: userData }
+            // Notify parent so it can prepend the post instantly
+            onPostCreated?.(enrichedPost)
+            toast.success('Post created successfully! 🎉')
+        } else {
+            toast.error('Failed to create post. Please try again.')
         }
         setLoading(false)
-
     }
 
     return <>
 
         <div className="p-4 mt-4 rounded-md shadow">
             <form onSubmit={createPost} >
-                <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="What's on your mind  "></Textarea>
+                <div className="flex gap-3 items-start">
+                    <img
+                        src={userData?.photo || placeholder}
+                        alt={userData?.name || 'Profile'}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 mt-1"
+                    />
+                    <TextArea className='w-full resize-none' value={body} onChange={(e) => setBody(e.target.value)} placeholder="What's on your mind  "></TextArea>
+                </div>
 
                 <div className="flex mt-3 justify-between items-center">
                     <label className='flex gap-2 cursor-pointer hover:text-blue-400'>
@@ -51,7 +76,7 @@ export default function PostForm({ getAllPosts }) {
 
                         <input onChange={handleImage} type='file' className='hidden' />
                     </label>
-                    <Button isDisabled={!(image || body)} isLoading={loading} type='submit'> post</Button>
+                    <Button isDisabled={!(image || body)} isPending={loading} type='submit'> post</Button>
                 </div>
 
                 {

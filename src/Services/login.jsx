@@ -4,9 +4,9 @@ import AxiosInstance from "../lib/AxiosBase";
 
 export async function signInData(val) {
     try {
-        const { data } = await axios.post('https://route-posts.routemisr.com/users/signin', val)
+        const { data } = await AxiosInstance.post('/users/signin', val)
         // console.log(data);
-        return data
+        return data.data
 
     } catch (error) {
         // console.log(error.response.data);
@@ -16,7 +16,7 @@ export async function signInData(val) {
 }
 export async function isLoggedInData() {
     try {
-        const { data } = await AxiosInstance.get('https://route-posts.routemisr.com/users/profile-data')
+        const { data } = await AxiosInstance.get('/users/profile-data')
 
         return data
 
@@ -26,3 +26,4 @@ export async function isLoggedInData() {
     }
 
 }
+

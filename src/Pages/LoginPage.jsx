@@ -1,4 +1,4 @@
-import { Button, Input } from '@heroui/react'
+import { Button, TextField, Label, Input, FieldError } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -6,7 +6,7 @@ import * as zod from "zod"
 import { signInData } from '../Services/login'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
-
+import toast from 'react-hot-toast'
 
 
 
@@ -37,11 +37,13 @@ export default function LoginPage() {
         // console.log(resp); //can be data or error that come from function signInData from login.jsx
         if (resp.error) {
             setApiError(resp.error)
+            toast.error(resp.error || 'Sign in failed. Please check your credentials.')
             setLoading(false)
         }
         else {
             localStorage.setItem('token', resp.token)
             setIsLogged(true)
+            toast.success('Welcome back! 👋')
             // The AuthRoute component will handle navigation automatically
         }
     }
@@ -49,23 +51,20 @@ export default function LoginPage() {
         <div className="min-w-md bg-white py-10 px-6 rounded-2xl shadow-2xl">
             <h2 className='text-center text-2xl mb-4'>loginPage</h2>
             <form onSubmit={handleSubmit(signIn)} className='flex flex-col gap-4' >
-                <Input {...register('email')} isInvalid={Boolean(formState.errors.email?.message)}
-                    errorMessage={formState.errors.email?.message}
-                    variant='bordered'
-                    label="email"
-                    labelPlacement='outside'
-                    type="email" placeholder='User@Example' />
+                <TextField isInvalid={Boolean(formState.errors.email?.message)}>
+                    <Label>email</Label>
+                    <Input {...register('email')} type="email" placeholder='User@Example' />
+                    <FieldError>{formState.errors.email?.message}</FieldError>
+                </TextField>
 
-
-                <Input  {...register('password')} isInvalid={Boolean(formState.errors.password?.message)}
-                    errorMessage={formState.errors.password?.message}
-                    variant='bordered'
-                    label="password"
-                    labelPlacement='outside'
-                    type="password" placeholder='password' />
+                <TextField isInvalid={Boolean(formState.errors.password?.message)}>
+                    <Label>password</Label>
+                    <Input {...register('password')} type="password" placeholder='password' />
+                    <FieldError>{formState.errors.password?.message}</FieldError>
+                </TextField>
 
                 {apiError && <p className='text-red-500 text-center'>{apiError}</p>}
-                <Button isLoading={loading} type='submit' color='primary' >submit</Button>
+                <Button isPending={loading} type='submit' variant='primary' >submit</Button>
                 <p>if you haven't account,please <Link to={'/register'} className='text-blue-400'>signUp</Link></p>
             </form>
 

@@ -1,8 +1,7 @@
-import { Button, Input, Select, SelectItem } from '@heroui/react'
+import { Button, TextField, Label, Input, FieldError, Select, ListBox, ListBoxItem } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { path } from 'framer-motion/client'
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import * as zod from "zod"
 import { sendRegisterData } from '../Services/register'
 import { Link, useNavigate } from 'react-router-dom'
@@ -38,7 +37,7 @@ export default function RegisterPage() {
     const [apiError, setApiError] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate()
-    const { handleSubmit, register, formState } = useForm({
+    const { handleSubmit, register, formState, control } = useForm({
         defaultValues: {
             name: "",
             email: "",
@@ -73,24 +72,72 @@ export default function RegisterPage() {
             <h2 className='text-center text-2xl mb-4'>RegisterPage </h2>
             <form onSubmit={handleSubmit(signUp)}
                 className='flex flex-col gap-4'>
-                <Input {...register('name')} isInvalid={Boolean(formState.errors.name?.message)} errorMessage={formState.errors.name?.message} variant='bordered' label="name" labelPlacement='outside' type="text" placeholder='Example' />
-                <Input {...register('email')} isInvalid={Boolean(formState.errors.email?.message)} errorMessage={formState.errors.email?.message} variant='bordered' label="email" labelPlacement='outside' type="email" placeholder='User@Example' />
-                <Input {...register('password')} isInvalid={Boolean(formState.errors.password?.message)} errorMessage={formState.errors.password?.message} variant='bordered' label="password" labelPlacement='outside' type="password" placeholder='Password' />
-                <Input  {...register('rePassword')} isInvalid={Boolean(formState.errors.rePassword?.message)} errorMessage={formState.errors.rePassword?.message} variant='bordered' label="rePassword" labelPlacement='outside' type="password" placeholder='Password' />
+                <TextField isInvalid={Boolean(formState.errors.name?.message)}>
+                    <Label>name</Label>
+                    <Input {...register('name')} type="text" placeholder='Example' />
+                    <FieldError>{formState.errors.name?.message}</FieldError>
+                </TextField>
 
-                <div className="flex gap-3">
-                    <Input {...register('dateOfBirth')} isInvalid={Boolean(formState.errors.dateOfBirth?.message)} errorMessage={formState.errors.dateOfBirth?.message} variant='bordered' label="dateOfBirth" labelPlacement='outside' type="date" placeholder='date' />
+                <TextField isInvalid={Boolean(formState.errors.email?.message)}>
+                    <Label>email</Label>
+                    <Input {...register('email')} type="email" placeholder='User@Example' />
+                    <FieldError>{formState.errors.email?.message}</FieldError>
+                </TextField>
 
-                    <Select {...register('gender')} isInvalid={Boolean(formState.errors.gender?.message)} errorMessage={formState.errors.gender?.message} className="max-w-xs" label="Select your gender" variant='bordered' labelPlacement='outside' placeholder='male'>
+                <TextField isInvalid={Boolean(formState.errors.password?.message)}>
+                    <Label>password</Label>
+                    <Input {...register('password')} type="password" placeholder='Password' />
+                    <FieldError>{formState.errors.password?.message}</FieldError>
+                </TextField>
 
-                        <SelectItem key={"male"}>male</SelectItem>
-                        <SelectItem key={"female"}>female</SelectItem>
+                <TextField isInvalid={Boolean(formState.errors.rePassword?.message)}>
+                    <Label>rePassword</Label>
+                    <Input {...register('rePassword')} type="password" placeholder='Password' />
+                    <FieldError>{formState.errors.rePassword?.message}</FieldError>
+                </TextField>
 
-                    </Select>
+                <div className="flex gap-3 items-start">
+                    <div className="flex-1">
+                        <TextField isInvalid={Boolean(formState.errors.dateOfBirth?.message)}>
+                            <Label>dateOfBirth</Label>
+                            <Input {...register('dateOfBirth')} type="date" placeholder='date' />
+                            <FieldError>{formState.errors.dateOfBirth?.message}</FieldError>
+                        </TextField>
+                    </div>
+
+                    <div className="flex-1">
+                        <Controller
+                            name="gender"
+                            control={control}
+                            render={({ field: { onChange, value }, fieldState: { error } }) => (
+                                <Select
+                                    placeholder="male"
+                                    selectedKeys={value ? [value] : []}
+                                    onSelectionChange={(keys) => {
+                                        const selected = Array.from(keys)[0];
+                                        onChange(selected);
+                                    }}
+                                    isInvalid={!!error}
+                                    className="max-w-xs"
+                                >
+                                    <Label>Select your gender</Label>
+                                    <Select.Trigger>
+                                        <Select.Value />
+                                        <Select.Indicator />
+                                    </Select.Trigger>
+                                    <ListBox>
+                                        <ListBoxItem id="male">male</ListBoxItem>
+                                        <ListBoxItem id="female">female</ListBoxItem>
+                                    </ListBox>
+                                    <FieldError>{error?.message}</FieldError>
+                                </Select>
+                            )}
+                        />
+                    </div>
 
                 </div>
                 {apiError && <p className='text-red-500 text-center'>{apiError}</p>}
-                <Button isLoading={loading} type='submit' color='primary' >submit</Button>
+                <Button isPending={loading} type='submit' variant='primary' >submit</Button>
                 <p>if you haven't account,please <Link to={'/login'} className='text-blue-400'>signIn</Link></p>
 
             </form>

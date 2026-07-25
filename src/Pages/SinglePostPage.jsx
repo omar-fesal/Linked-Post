@@ -7,14 +7,17 @@ import PostCard from '../Components/Posts/PostCard';
 
 export default function SinglePostPage() {
     const [post, setPost] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(null);
     const { id } = useParams()
 
 
+
     async function getPost() {
+        setLoading(true)
         const resp = await getSinglePosts(id);
         if (resp.message == 'success') {
-            setPost(resp.post)
+            setPost(resp.data.post)
+
         }
         setLoading(false)
     }
@@ -27,7 +30,7 @@ export default function SinglePostPage() {
         {
             loading ? <LoadingScreen /> :
                 <div className="w-xl mx-auto">
-                    <PostCard post={post} commentLimit={post.comments.length + 1} />
+                    <PostCard post={post} commentLimit={post?.commentsCount + 1} />
 
                 </div>
         }

@@ -6,7 +6,7 @@ export default function LoadingScreen() {
 
 
 
-        <Card className=" space-y-5 p-4 mt-4" radius="lg">
+        <Card className=" space-y-5 p-4 mt-4 rounded-lg">
 
             <div className=" w-full flex items-center gap-3 ">
                 <div>
