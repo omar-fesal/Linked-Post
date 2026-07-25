@@ -21,7 +21,7 @@ import toast from 'react-hot-toast'
 
 
 
-export default function PostCard({ post: initialPost, commentLimit, callback }) {
+export default function PostCard({ post: initialPost, commentLimit, callback, onPostShared }) {
     // Local copy of post so edits reflect instantly without refetching
     const [post, setPost] = useState(initialPost);
 
@@ -232,6 +232,7 @@ export default function PostCard({ post: initialPost, commentLimit, callback }) 
                 id={post?._id}
                 likesCount={likesCount}
                 post={post}
+                onPostShared={onPostShared}
             />
 
             {/* COMMENT FORM */}

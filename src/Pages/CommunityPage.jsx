@@ -23,6 +23,10 @@ export default function CommunityPage() {
         setPosts((prev) => prev.filter((p) => (p._id || p.id) !== deletedId))
     }
 
+    function handlePostShared(newPost) {
+        setPosts((prev) => [newPost, ...prev])
+    }
+
     return <>
         {isLoading ? (
             <LoadingScreen />
@@ -38,6 +42,7 @@ export default function CommunityPage() {
                     post={post}
                     commentLimit={1}
                     callback={handlePostDeleted}
+                    onPostShared={handlePostShared}
                 />
             ))
         )}

@@ -1,22 +1,30 @@
 import { Button, Modal, Input } from "@heroui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { sharePostApi } from "../../Services/PostService";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
-export function PostShareDialog({ open, setOpen, postId }) {
+export function PostShareDialog({ open, setOpen, postId, onShared, onPostShared }) {
     const [body, setBody] = useState("");
-    const queryClient = useQueryClient();
 
     const { mutate, isPending } = useMutation({
         mutationFn: () => sharePostApi(postId, body.trim() ? { body: body.trim() } : {}),
 
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ["posts"]
-            });
+        onSuccess: (data) => {
+            const newPost = data?.data?.post
+            // Update share count on the original post instantly
+            const newCount = newPost?.sharedPost?.sharesCount
+            if (newCount !== undefined) onShared?.(newCount)
+            // Prepend the new share post to the feed instantly
+            if (newPost) onPostShared?.(newPost)
 
+            toast.success('Post shared successfully 🔁')
             setOpen(false);
             setBody("");
+        },
+
+        onError: () => {
+            toast.error('Failed to share post. Please try again.')
         }
     });
 

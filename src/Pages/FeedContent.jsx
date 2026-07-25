@@ -52,6 +52,7 @@ export default function FeedContent() {
                         post={post}
                         commentLimit={1}
                         callback={handlePostDeleted}
+                        onPostShared={handlePostCreated}
                     />
                 ))
             )}

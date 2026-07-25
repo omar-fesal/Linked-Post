@@ -9,7 +9,7 @@ import { PostShareDialog } from './PostShareDialog'
 import BookmarkBtn from './BookmarkBtn'
 import { PostLikesDialog } from './PostLikesDialog'
 
-export default function PostComment({ commentsCount, id, likesCount, post }) {
+export default function PostComment({ commentsCount, id, likesCount, post, onPostShared }) {
 
 
 
@@ -21,6 +21,7 @@ export default function PostComment({ commentsCount, id, likesCount, post }) {
     const [likesOpen, setLikesOpen] = useState(false);
     const [isLiked, setIsLiked] = useState(post?.likes?.includes(userData?.id) || false);
     const [likes, setLikes] = useState(likesCount);
+    const [sharesCount, setSharesCount] = useState(post?.sharesCount || 0);
 
 
     function likePost() {
@@ -77,7 +78,7 @@ export default function PostComment({ commentsCount, id, likesCount, post }) {
                         </div>
 
                         <span className="text-gray-500 text-sm">
-                            {post?.sharesCount || 0}
+                            {sharesCount}
                         </span>
                     </div>
 
@@ -140,6 +141,8 @@ export default function PostComment({ commentsCount, id, likesCount, post }) {
                     open={open}
                     setOpen={setOpen}
                     postId={id}
+                    onShared={(newCount) => setSharesCount(newCount)}
+                    onPostShared={onPostShared}
                 />
 
                 <PostLikesDialog
