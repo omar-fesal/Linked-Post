@@ -1,4 +1,4 @@
-import { Button, TextField, Label, Input, FieldError, Select, ListBox, ListBoxItem } from '@heroui/react'
+import { Button, TextField, Label, Input, FieldError } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -110,30 +110,23 @@ export default function RegisterPage() {
                             name="gender"
                             control={control}
                             render={({ field: { onChange, value }, fieldState: { error } }) => (
-                                <Select
-                                    placeholder="male"
-                                    selectedKeys={value ? [value] : []}
-                                    onSelectionChange={(keys) => {
-                                        const selected = Array.from(keys)[0];
-                                        onChange(selected);
-                                    }}
-                                    isInvalid={!!error}
-                                    className="max-w-xs"
-                                >
-                                    <Label>Select your gender</Label>
-                                    <Select.Trigger>
-                                        <Select.Value />
-                                        <Select.Indicator />
-                                    </Select.Trigger>
-                                    <ListBox>
-                                        <ListBoxItem id="male">male</ListBoxItem>
-                                        <ListBoxItem id="female">female</ListBoxItem>
-                                    </ListBox>
-                                    <FieldError>{error?.message}</FieldError>
-                                </Select>
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-sm font-medium">Select your gender</label>
+                                    <select
+                                        value={value}
+                                        onChange={(e) => onChange(e.target.value)}
+                                        className={`w-full border rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-blue-400 transition-all appearance-none cursor-pointer ${error ? 'border-red-500' : 'border-gray-300'}`}
+                                    >
+                                        <option value="" disabled>Select gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                    </select>
+                                    {error && <p className="text-red-500 text-xs">{error.message}</p>}
+                                </div>
                             )}
                         />
                     </div>
+
 
                 </div>
                 {apiError && <p className='text-red-500 text-center'>{apiError}</p>}
