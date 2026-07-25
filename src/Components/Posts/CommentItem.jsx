@@ -12,6 +12,15 @@ import { ImagePlus, MoreHorizontal, Pencil, Trash2, Heart, Reply, X, Send, Chevr
 
 const REPLY_INITIAL_LIMIT = 6
 
+// Pure helper — derives liked state from comment data + current user ID
+// Handles both string and ObjectId types, and an explicit isLiked boolean
+function deriveLiked(comment, userId) {
+    if (comment.isLiked !== undefined) return Boolean(comment.isLiked)
+    if (!Array.isArray(comment.likes)) return false
+    const uid = String(userId ?? '')
+    return comment.likes.some((id) => String(id) === uid)
+}
+
 /* ─────────────────────────────────────────────── */
 /*  Tiny inline edit form that replaces the bubble  */
 /* ─────────────────────────────────────────────── */
@@ -40,7 +49,13 @@ function InlineEditForm({ comment, postId, onCancel, onSaved }) {
         image && fd.append('image', image)
         const resp = await updateCommentApi(postId, comment._id, fd)
         setSaving(false)
-        if (resp?.message === 'success') onSaved(resp)
+        // Accept any non-error response (API may return different message strings)
+        if (resp && !resp.message?.toLowerCase().includes('error') && !resp.status) {
+            onSaved({
+                content: content.trim(),
+                image: imageUrl || existingImage || null,
+            })
+        }
     }
 
     return (
@@ -261,12 +276,15 @@ export default function CommentItem({
     const [comment, setComment] = useState(initialComment)
 
     /* ── like state ── */
-    const [liked, setLiked] = useState(
-        Array.isArray(initialComment.likes) &&
-        initialComment.likes.includes(userData?._id)
-    )
-    const [likeCount, setLikeCount] = useState(initialComment.likesCount ?? 0)
+    const [liked, setLiked] = useState(() => deriveLiked(initialComment, userData?._id))
+    const [likeCount, setLikeCount] = useState(initialComment.likesCount ?? initialComment.likes?.length ?? 0)
     const [likePending, setLikePending] = useState(false)
+
+    // Re-sync when the comment is re-fetched from the API (e.g. on page refresh)
+    useEffect(() => {
+        setLiked(deriveLiked(initialComment, userData?._id))
+        setLikeCount(initialComment.likesCount ?? initialComment.likes?.length ?? 0)
+    }, [initialComment._id, initialComment.likes, initialComment.likesCount, initialComment.isLiked, userData?._id])
 
     /* ── inline editing ── */
     const [isEditing, setIsEditing] = useState(false)
@@ -309,13 +327,13 @@ export default function CommentItem({
     }
 
     /* ── Edit saved ── */
-    function handleSaved(resp) {
-        // Update local comment data from response
-        if (resp?.data?.comment) {
-            setComment((prev) => ({ ...prev, ...resp.data.comment }))
-        } else {
-            // fallback: at minimum keep what we already have
-        }
+    function handleSaved(updatedFields) {
+        // Merge updated fields directly into local comment state — no refresh needed
+        setComment((prev) => ({
+            ...prev,
+            content: updatedFields.content ?? prev.content,
+            image: updatedFields.image !== undefined ? updatedFields.image : prev.image,
+        }))
         setIsEditing(false)
     }
 
